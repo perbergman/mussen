@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/aad2f95b-fb3b-4527-aba8-f23651a23312/resourceGroups/rg-anm-test/providers/Microsoft.Web/sites/otp-test-1/subscriptions/aad2f95b-fb3b-4527-aba8-f23651a23312/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/mussen",
+    "appService.deploySubpath": "."
+}

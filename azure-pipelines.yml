@@ -1,0 +1,56 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+  
+stages:
+- stage: build
+  displayName: 'Build'
+  jobs:
+  - job: build_test
+    displayName: 'Build and test'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+    - script: |
+        npm install
+        npm run build
+      displayName: 'npm install, build, and test'
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+    - task: PublishPipelineArtifact@0
+      inputs:
+        targetPath: '$(System.ArtifactsDirectory)'
+
+- stage: dev
+  displayName: 'Dev'
+  dependsOn: build
+  jobs:
+  - deployment: deployDev
+    displayName: 'Deploy dev'
+    environment: isabelDevEnv
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@1
+            inputs:
+              downloadPath: '$(System.DefaultWorkingDirectory)'
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: service-connection
+              appType: 'webAppLinux'
+              appName: mussen
+              runtimeStack: 'NODE|18.x'
+              startUpCommand: 'pm2 serve /home/site/wwwroot/build --spa --no-daemon'
